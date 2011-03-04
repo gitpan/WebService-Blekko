@@ -1,0 +1,19 @@
+Changes
+ignore.txt
+lib/WebService/Blekko.pm
+lib/WebService/Blekko/Pagestats.pm
+lib/WebService/Blekko/QueryResult.pm
+lib/WebService/Blekko/QueryResultSet.pm
+lib/WebService/Blekko/Result.pm
+Makefile.PL
+MANIFEST
+META.yml			Module meta-data (added by MakeMaker)
+README
+t/00-load.t
+t/boilerplate.t
+t/manifest.t
+t/pagestats.t
+t/pod.t
+t/query.t
+t/slashtags-ro.t
+t/slashtags-rw.t
