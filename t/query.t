@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings qw( uninitialized );
 
-use Test::More tests => 29;
+use Test::More tests => 26;
 
 use Time::HiRes;
 use Data::Dumper;
@@ -29,26 +29,26 @@ ok( ! $answer->next, "bad server: no results" );
 $answer = $redirserver->query( "obama" );
 ok( $answer->error, "redir server: error" );
 ok( ! $answer->next, "redir server: no results" );
-ok( $answer->http_code =~ /^3/, "redir server: redir seen" );
+ok( $answer->http_code =~ /^3/, "redir server: redir seen: got ".$answer->http_code );
 
 $answer = $four04server->query( "obama" );
 ok( $answer->error, "404 server: error" );
 ok( ! $answer->next, "404 server: no results" );
-ok( $answer->http_code =~ /^4/, "404 server: 4xx seen" );
+ok( $answer->http_code =~ /^(4|301|302)/, "404 server: 4xx or redir seen: got ".$answer->http_code );
 
 my $rand = int( rand( 1_000_000 ) );
 $answer = $blekko->query( "obamarh$rand" );
 ok( ! $answer->error, "random does-not-exist query: no error" );
 ok( $answer->total_num == 0, "random does-not-exist query: 0 results" );
 ok( ! $answer->next, "random does-not-exist query: no next result" );
-ok( $answer->http_code eq '200', "random does-not-exist query: status is 200" );
+ok( $answer->http_code eq '200', "random does-not-exist query: status is 200: got ".$answer->http_code );
 
 # successes
 
 $answer = $blekko->query( "obama" );
 
 ok( ! $answer->error, "query: no error" );
-ok( $answer->http_code eq '200', "query: status is 200" );
+ok( $answer->http_code eq '200', "query: status is 200: got ".$answer->http_code );
 ok( $answer->total_num > 32, "query: got at least 32 of 34 results" ); # can be less than 34 for reasons too complicated to explain
 
 ok( defined $answer->raw, "query: raw answer exists" );
@@ -84,13 +84,11 @@ ok( $snippets > 30, "query: almost all results have raw snippets" );
 # bogus slashtag gives error
 
 $answer = $blekko->query( "obama /asdfasdf" );
-ok( defined $answer, "query: answer is defined" );
 ok( $answer->error =~ / is not valid/, "query: answer with bogus slashtag got error / is not valid/" );
 
 # suggested slashtags
 
 $answer = $blekko->query( "linus torvalds" );
-ok( defined $answer, "linux torvalds: answer is defined" );
 ok( defined $answer->sug_slash, "linus torvalds: got slashtag suggestions" );
 ok( ref $answer->sug_slash eq 'ARRAY', "linus torvalds: suggestions are an array ref" );
 ok( scalar @{$answer->sug_slash} > 1, "linus torvalds: more than one suggestion" );
@@ -101,7 +99,6 @@ ok( $elapsed >= 0.7, "2 calls in a row obeys qps, ish, elapsed = $elapsed" ); # 
 # auto-slashtags
 
 $answer = $blekko->query( "cure for headaches" );
-ok( defined $answer, "cure for headaches: answer is defined" );
 ok( $answer->auto_slashtag eq "/blekko/health", "cure for headaches: query was rewritten with /health" );
 ok( $answer->auto_slashtag_query eq "/ps=34 /json cure for headaches /health", "cure for headaches: saw the new query" );
 

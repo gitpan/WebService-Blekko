@@ -60,57 +60,57 @@ ok( $answer->http_code == '200', "login with nocookiejar is 200" );
     eval {
         $answer = $badserver->login( $user, $password );
     };
-    ok( $answer->error, "login to badserver fails" );
-    ok( ! $answer->result, "login to badserver fails" );
+    ok( $answer->error, "login to badserver is error" );
+    ok( ! $answer->result, "login to badserver is no result" );
 
     eval {
         $answer = $badserver->logout();
     };
-    ok( $answer->error, "logout from badserver fails" );
-    ok( ! $answer->result, "logout from badserver fails" );
+    ok( $answer->error, "logout from badserver is error" );
+    ok( ! $answer->result, "logout from badserver is no result" );
 }
 
 $answer = $redirserver->login( $user, $password );
-ok( $answer->error, "login to redirserver fails" );
-ok( ! $answer->result, "login to redirserver fails" );
+ok( $answer->error, "login to redirserver is error" );
+ok( ! $answer->result, "login to redirserver is no result" );
 
 $answer = $redirserver->logout();
-ok( $answer->error, "logout from redirserver fails" );
-ok( ! $answer->result, "logout from redirserver fails" );
+ok( $answer->error, "logout from redirserver is error" );
+ok( ! $answer->result, "logout from redirserver is no result" );
 
 $answer = $four04server->login( $user, $password );
 ok( $answer->error, "login to four04server fails" );
 ok( ! $answer->result, "login to four04server fails" );
-ok( $answer->http_code == '404', "login to four04server is 404" );
+ok( $answer->http_code =~ /^(404|301|302)/, "login to four04server is 404 or redir: got ".$answer->http_code );
 
 $answer = $four04server->logout();
-ok( $answer->error, "logout from four04server fails" );
-ok( ! $answer->result, "logout from four04server fails" );
-ok( $answer->http_code == '404', "logout from four04server is 404" );
+ok( $answer->error, "logout from four04server is error" );
+ok( ! $answer->result, "logout from four04server is no result" );
+ok( $answer->http_code =~ /^(404|301|302)/, "logout from four04server is 404 or redir: got ".$answer->http_code );
 
 $answer = $blekko->login( $user, $password );
-ok( ! $answer->error, "login to blekko" );
-ok( $answer->result, "login to blekko" );
+ok( ! $answer->error, "login to blekko no error" );
+ok( $answer->result, "login to blekko result" );
 
 $answer = $blekko->user_info();
-ok( ! $answer->error, "user_info while logged in" );
-ok( $answer->result eq $user, "user_info while logged in" );
+ok( ! $answer->error, "user_info while logged in no error" );
+ok( $answer->result eq $user, "user_info while logged in result" );
 
 $answer = $blekko->logout();
-ok( ! $answer->error, "logout from blekko" );
-ok( $answer->result, "logout from blekko" );
+ok( ! $answer->error, "logout from blekko no error" );
+ok( $answer->result, "logout from blekkoresult" );
 
 $answer = $blekko->user_info();
-ok( $answer->error, "user_info while logged out" );
-ok( ! $answer->result, "user_info while logged out" );
+ok( $answer->error, "user_info while logged out is error" );
+ok( ! $answer->result, "user_info while logged out no result" );
 
 $answer = $blekko->logout();
-ok( ! $answer->error, "logout twice from blekko" );
-ok( $answer->result, "logout twice from blekko" );
+ok( ! $answer->error, "logout twice from blekko no error" );
+ok( $answer->result, "logout twice from blekko result" );
 
 $answer = $blekko->login( $user, $password );
-ok( $answer->result, "re-login to blekko" );
-ok( ! $answer->error, "re-login to blekko" );
+ok( $answer->result, "re-login to blekko no error" );
+ok( ! $answer->error, "re-login to blekko result" );
 
 # delete_urls / list / add_urls
 
@@ -122,38 +122,38 @@ my @temp;
 # XXX urls must be an array ref
 
 $answer = $blekko->delete_urls( 'teaaaasttag1', \@urls );
-ok( $answer->error, "deleting urls from non-existant teaaasttag1 fails" );
-ok( ! $answer->result, "deleting urls from non-existant teaaasttag1 fails" );
+ok( $answer->error, "deleting urls from non-existant teaaasttag1 is error" );
+ok( ! $answer->result, "deleting urls from non-existant teaaasttag1 no result" );
 $answer = $blekko->list_urls( 'teaaasttag1' );
-ok( $answer->error, "listing urls in non-existant teaaasttag1 fails" );
-ok( ! $answer->result, "listing urls in non-existant teaaasttag1 fails" );
+ok( $answer->error, "listing urls in non-existant teaaasttag1 is error" );
+ok( ! $answer->result, "listing urls in non-existant teaaasttag1 no result" );
 $answer = $blekko->add_urls( 'teaaasttag1', \@urls );
-ok( $answer->error, "adding urls to non-existing slashtag" );
-ok( ! $answer->result, "adding urls to non-existing slashtag" );
+ok( $answer->error, "adding urls to non-existing slashtag is error" );
+ok( ! $answer->result, "adding urls to non-existing slashtag no result" );
 
 $answer = $blekko->logout();
-ok( ! $answer->error, "logout from blekko" );
-ok( $answer->result, "logout from blekko" );
+ok( ! $answer->error, "logout from blekko no errro" );
+ok( $answer->result, "logout from blekko result" );
 
 $answer = $blekko->delete_urls( 'testtag1', \@urls );
-ok( $answer->error, "deleting urls fails while logged out" );
-ok( ! $answer->result, "deleting urls fails while logged out" );
+ok( $answer->error, "deleting urls fails while logged out is error" );
+ok( ! $answer->result, "deleting urls fails while logged out no result" );
 $answer = $blekko->add_urls( 'testtag1', \@urls );
-ok( $answer->error, "adding urls fails while logged out" );
-ok( ! $answer->result, "adding urls fails while logged out" );
+ok( $answer->error, "adding urls fails while logged out is  error" );
+ok( ! $answer->result, "adding urls fails while logged out no result" );
 
 $answer = $blekko->login( $user, $password );
-ok( $answer->result, "re-login to blekko" );
-ok( ! $answer->error, "re-login to blekko" );
+ok( ! $answer->error, "re-login to blekko no errro" );
+ok( $answer->result, "re-login to blekko result" );
 
 # now successes
 # delete urls, just to be sure they aren't there, delete always succeeds
 
 $answer = $blekko->delete_urls( 'testtag1', \@urls );
-ok( $answer->result, "deleting urls from testtag1" );
-ok( ! $answer->error, "deleting urls from testtag1" );
+ok( ! $answer->error, "deleting urls from testtag1 no error" );
+ok( $answer->result, "deleting urls from testtag1 result" );
 $answer = $blekko->list_urls( 'testtag1' );
-ok( ! $answer->error, "listing urls in testtag1" );
+ok( ! $answer->error, "listing urls in testtag1 no error" );
 ok( ref $answer->result eq 'ARRAY', "return value from list is array ref" );
 @temp = @{$answer->result};
 push @temp, @fullurls;
@@ -162,10 +162,10 @@ ok( scalar @{$answer->result} == scalar( uniq @temp ) - 2, "deleted urls are not
 # add urls
 
 $answer = $blekko->add_urls( 'testtag1', \@urls );
-ok( ! $answer->error, "adding urls to testtag1" );
-ok( $answer->result, "adding urls to testtag1" );
+ok( ! $answer->error, "adding urls to testtag1 no error" );
+ok( $answer->result, "adding urls to testtag1 result" );
 $answer = $blekko->list_urls( 'testtag1' );
-ok( ! $answer->error, "listing urls in testtag1" );
+ok( ! $answer->error, "listing urls in testtag1 no error" );
 ok( ref $answer->result eq 'ARRAY', "return value from list is array ref" );
 @temp = @{$answer->result};
 push @temp, @fullurls;
@@ -175,18 +175,18 @@ ok( scalar @{$answer->result} == scalar( uniq @temp ), "added urls are in list i
 # XXX urls must be an array ref
 
 $answer = $blekko->delete_urls( 'testtag1', \@urls );
-ok( $answer->result, "deleting urls from testtag1" );
-ok( ! $answer->error, "deleting urls from testtag1" );
+ok( ! $answer->error, "deleting urls from testtag1 no error" );
+ok( $answer->result, "deleting urls from testtag1 result" );
 $answer = $blekko->list_urls( 'testtag1' );
-ok( ! $answer->error, "listing urls in testtag1" );
+ok( ! $answer->error, "listing urls in testtag1 no error" );
 ok( ref $answer->result eq 'ARRAY', "return value from list is array ref" );
 @temp = @{$answer->result};
 push @temp, @fullurls;
 ok( scalar @{$answer->result} == scalar( uniq @temp ) - 2, "deleted urls are not in list of testtag1" );
 
 $answer = $blekko->logout();
-ok( $answer->result, "re-logout from blekko" );
-ok( ! $answer->error, "re-logout from blekko" );
+ok( ! $answer->error, "re-logout from blekko no error" );
+ok( $answer->result, "re-logout from blekko result" );
 
 # create_slashtag
 # XXX illegal tag name
@@ -195,25 +195,25 @@ ok( ! $answer->error, "re-logout from blekko" );
 # XXX tag already exists
 
 $answer = $blekko->login( $user, $password );
-ok( $answer->result, "re-login to blekko" );
-ok( ! $answer->error, "re-login to blekko" );
+ok( ! $answer->error, "re-login to blekko no error" );
+ok( $answer->result, "re-login to blekko result" );
 my $tagname = sprintf "tag%4.4d", int( rand( 9999 ) );
 $answer = $blekko->create_slashtag( $tagname, \@urls, "A test tag" );
-ok( $answer->result, "create_slashtag $tagname" );
-ok( ! $answer->error, "create_slashtag $tagname" );
+ok( ! $answer->error, "create_slashtag $tagname no error" );
+ok( $answer->result, "create_slashtag $tagname result" );
 $answer = $blekko->list_urls( $tagname );
-ok( ! $answer->error, "listing urls in $tagname" );
+ok( ! $answer->error, "listing urls in $tagname no error" );
 ok( ref $answer->result eq 'ARRAY', "return value from list is array ref" );
 ok( scalar @{$answer->result} == scalar @fullurls, "correct number of urls in $tagname" );
 
 # remove_slashtag
 {
-$TODO="Needs a bugfix";
-$answer = $blekko->remove_slashtag( $tagname );
-ok( $answer->result, "delete $tagname" );
-ok( ! $answer->error, "delete $tagname" );
+    $TODO="Needs a bugfix";
+    $answer = $blekko->remove_slashtag( $tagname );
+    ok( ! $answer->error, "delete $tagname no error" );
+    ok( $answer->result, "delete $tagname result" );
 }
 $answer = $blekko->remove_slashtag( $tagname );
-ok( ! $answer->result, "delete $tagname twice fails" );
-ok( $answer->error, "delete $tagname twice fails" );
+ok( $answer->error, "delete $tagname twice fails error" );
+ok( ! $answer->result, "delete $tagname twice fails no result" );
 

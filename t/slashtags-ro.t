@@ -20,18 +20,18 @@ my $four04server = WebService::Blekko->new( server => 'bugz.blekko.com', scheme 
 # logout
 
 $answer = $blekko->logout();
-ok( ! $answer->error, "logout from blekko" );
-ok( $answer->result, "logout from blekko" );
+ok( ! $answer->error, "logout from blekko no error" );
+ok( $answer->result, "logout from blekko result" );
 
 # list
 
 $answer = $blekko->list_urls( 'teaaasttag1' );
-ok( $answer->error, "listing urls in non-existant teaaasttag1 fails" );
-ok( ! $answer->result, "listing urls in non-existant teaaasttag1 fails" );
+ok( $answer->error, "listing urls in non-existant teaaasttag1 gets error" );
+ok( ! $answer->result, "listing urls in non-existant teaaasttag1 no result" );
 
 $answer = $blekko->list_urls( '/health' );
-ok( ! $answer->error, "listing urls in /health succeeds" );
-ok( $answer->result, "listing urls in /health succeeds" );
+ok( ! $answer->error, "listing urls in /health no error" );
+ok( $answer->result, "listing urls in /health result" );
 
 ok( ref $answer->result eq 'ARRAY', "list_slashtag returns an array ref" );
 ok( scalar @{$answer->result} > 10, "/health has more than 10 urls" );
