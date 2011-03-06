@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:               WebService-Blekko
-version:            1.00_01
-abstract:           ~
+version:            1.00_02
+abstract:           access the Blekko JSON APIs
 author:
     - Greg Lindahl <greg@blekko.com>
 license:            perl
@@ -11,7 +11,13 @@ configure_requires:
 build_requires:
     ExtUtils::MakeMaker:  0
 requires:
-    Test::More:  0
+    Data::Dumper:    0
+    HTTP::Request:   0
+    List::Util:      0
+    LWP::UserAgent:  0
+    Test::More:      0
+    Time::HiRes:     0
+    YAML:            0
 no_index:
     directory:
         - t

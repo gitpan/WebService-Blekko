@@ -4,7 +4,7 @@ package WebService::Blekko;
 
 =head1 NAME
 
-WebService::Blekko -- access the Blekko JSON APIs
+WebService::Blekko - access the Blekko JSON APIs
 
 =cut
 
@@ -24,7 +24,7 @@ use WebService::Blekko::QueryResultSet;
 use WebService::Blekko::Pagestats;
 use WebService::Blekko::Result;
 
-our $VERSION = '1.00_01';
+our $VERSION = '1.00_02';
 
 my $useragent = __PACKAGE__ . '_' . $VERSION;
 
