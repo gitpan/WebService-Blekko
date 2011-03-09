@@ -12,10 +12,22 @@ use WebService::Blekko;
 
 use LWP::Protocol;
 
+my $skip = '';
+
 eval "use YAML";
-if ( $@ || ! LWP::Protocol::implementor( 'https' ) )
+if ( $@ )
 {
-    plan skip_all => "No YAML or no https, no rw testing.";
+    $skip .= "no YAML ";
+}
+
+if ( ! LWP::Protocol::implementor( 'https' ) )
+{
+    $skip .= "no https ";
+}
+
+if ( $skip ne '' )
+{
+    plan skip_all => "$skip, no rw testing.";
     exit 0;
 }
 

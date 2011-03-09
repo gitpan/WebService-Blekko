@@ -25,7 +25,7 @@ use WebService::Blekko::QueryResultSet;
 use WebService::Blekko::Pagestats;
 use WebService::Blekko::Result;
 
-our $VERSION = '1.00_05';
+our $VERSION = '1.00_06';
 
 my $useragent = __PACKAGE__ . '_' . $VERSION;
 
