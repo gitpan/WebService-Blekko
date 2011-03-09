@@ -10,10 +10,12 @@ use List::MoreUtils qw( uniq );
 use Data::Dumper;
 use WebService::Blekko;
 
+use LWP::Protocol;
+
 eval "use YAML";
-if ( $@ )
+if ( $@ || ! LWP::Protocol::implementor( 'https' ) )
 {
-    plan skip_all => "No YAML, no rw testing.";
+    plan skip_all => "No YAML or no https, no rw testing.";
     exit 0;
 }
 

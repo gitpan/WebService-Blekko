@@ -13,6 +13,7 @@ use warnings;
 no warnings qw( uninitialized );
 
 use LWP::UserAgent;
+use LWP::Protocol;
 use HTTP::Request;
 use List::Util qw( min );
 use Time::HiRes;
@@ -24,7 +25,7 @@ use WebService::Blekko::QueryResultSet;
 use WebService::Blekko::Pagestats;
 use WebService::Blekko::Result;
 
-our $VERSION = '1.00_04';
+our $VERSION = '1.00_05';
 
 my $useragent = __PACKAGE__ . '_' . $VERSION;
 
@@ -64,7 +65,7 @@ Options include
  server => server to talk to, defaults to blekko.com
  auth => api auth key, gotten by contacting apiauth@blekko.com
  source => the name of your program/service
- pagesize => number of results to return, default 20, max of 100
+ page_size => number of results to return, default 20, max of 100
  scheme => http, defaults to https
  qps => API calls per second, defaults to 1. Do not make this greater than 1 without asking.
  agent => the user-agent to be used by LWP::UserAgent. Defaults to the package name_version.
@@ -85,10 +86,10 @@ sub new
 
     $self->{server} = delete $opts{server} || 'blekko.com';
     $self->{auth} = delete $opts{auth} || die "Must specify auth in opts";
-    $self->{auth} = "&auth=$self->{auth}";
+    $self->{auth} = "&auth=" . urlencode( $self->{auth} );
     $self->{source} = delete $opts{source} || $useragent;
-    $self->{source} = "&source=$self->{source}";
-    $self->{pagesize} = delete $opts{pagesize};
+    $self->{source} = "&source=" . urlencode( $self->{source} );
+    $self->{page_size} = delete $opts{page_size};
     $self->{scheme} = delete $opts{scheme} || 'https';
     $self->{qps} = min( delete $opts{qps} || 1, 1 );
     $self->{last_query} = 0;
@@ -98,8 +99,10 @@ sub new
     my $cj = delete $opts{cookie_jar};
     $opts{max_redirect} ||= 0; # don't follow redirects
 
-    # remaining opts are for LWP::UserAgent... default timeout is 180 seconds, yuck.
+    # is the scheme valid?
+    die "invalid scheme $self->{scheme}" if ! LWP::Protocol::implementor($self->{scheme});
 
+    # remaining opts are for LWP::UserAgent... default timeout is 180 seconds, yuck.
     $self->{ua} = LWP::UserAgent->new( %opts );
     return if ! defined $self->{ua};
 
@@ -111,23 +114,29 @@ sub new
     return $self;
 }
 
-=head2 query( query_string )
+=head2 query( query_string, %opts )
 
 Queries the server, and returns a WebService::Blekko::QueryResultSet.
+
+Options include page_size (see above) and p, to get the pth page of
+results, counting from zero.
 
 =cut
 
 sub query
 {
-    my ( $self, $q ) = @_; # XXX opts
+    my ( $self, $q, %opts ) = @_;
 
-    my $template = "%s://%s/ws/?q=%s%s%s";
+    my $template = "%s://%s/ws/?q=%s%s%s%s%s";
+
     my $ps = '';
-    $ps = "/ps=$self->{pagesize} " if $self->{pagesize};
+    $ps = "&page_size=$self->{page_size}" if $self->{page_size};
+    $ps = "&page_size=$opts{page_size}" if $opts{page_size};
+    my $p = '';
+    $p = "&p=$opts{p}" if $opts{p};
 
     my $url = sprintf( $template, $self->{scheme}, $self->{server},
-                       urlencode( "$ps/json $q" ), $self->{auth}, $self->{source} );
-    # XXX opts to set page number
+                       urlencode( "/json $q" ), $self->{auth}, $self->{source}, $ps, $p );
 
     my $req = HTTP::Request->new( 'GET', $url );
     $self->query_sleep();

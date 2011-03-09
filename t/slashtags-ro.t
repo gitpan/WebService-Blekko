@@ -4,18 +4,27 @@ use strict;
 use warnings;
 no warnings qw( uninitialized );
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 use List::MoreUtils qw( uniq );
 
 use WebService::Blekko;
 
+use LWP::Protocol;
+my $scheme = 'https';
+$scheme = 'http' if ! LWP::Protocol::implementor($scheme);
+
 my $answer;
+
+eval {
+	WebService::Blekko->new( auth => 'webservice-blekko-testing', scheme => 'not-a-valid-scheme' );
+};
+ok( scalar $@, "invalid scheme throws an exception" );
 
 my $blekko = WebService::Blekko->new( auth => 'webservice-blekko-testing', );
 my $badserver = WebService::Blekko->new( server => 'doesnotexist.blekko.com', auth => 'webservice-blekko-testing', );
 my $redirserver = WebService::Blekko->new( server => 'www.blekko.com', scheme => 'http', auth => 'webservice-blekko-testing', );
-my $four04server = WebService::Blekko->new( server => 'bugz.blekko.com', scheme => 'https', auth => 'webservice-blekko-testing', );
+my $four04server = WebService::Blekko->new( server => 'bugz.blekko.com', scheme => $scheme, auth => 'webservice-blekko-testing', );
 
 # logout
 

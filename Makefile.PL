@@ -13,7 +13,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::More' => 0,
-        'YAML' => 0,
+        'JSON' => 0,
         'Time::HiRes' => 0,
         'LWP::UserAgent' => 0,
         'HTTP::Request' => 0,

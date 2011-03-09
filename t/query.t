@@ -4,17 +4,21 @@ use strict;
 use warnings;
 no warnings qw( uninitialized );
 
-use Test::More tests => 26;
+use Test::More tests => 33;
 
 use Time::HiRes;
 use Data::Dumper;
 
 use WebService::Blekko;
 
-my $blekko = WebService::Blekko->new( pagesize => 34, scheme => 'http', qps => 1, auth => 'webservice-blekko-testing', );
+use LWP::Protocol;
+my $scheme = 'https';
+$scheme = 'http' if ! LWP::Protocol::implementor($scheme);
+
+my $blekko = WebService::Blekko->new( page_size => 34, scheme => 'http', qps => 1, auth => 'webservice-blekko-testing', );
 my $badserver = WebService::Blekko->new( server => 'doesnotexist.blekko.com', auth => 'webservice-blekko-testing', );
 my $redirserver = WebService::Blekko->new( server => 'www.blekko.com', scheme => 'http', auth => 'webservice-blekko-testing', );
-my $four04server = WebService::Blekko->new( server => 'bugz.blekko.com', scheme => 'https', auth => 'webservice-blekko-testing', );
+my $four04server = WebService::Blekko->new( server => 'bugz.blekko.com', scheme => $scheme, auth => 'webservice-blekko-testing', );
 
 my $answer;
 my $ok;
@@ -53,7 +57,7 @@ ok( $answer->total_num > 32, "query: got at least 32 of 34 results" ); # can be 
 
 ok( defined $answer->raw, "query: raw answer exists" );
 $ok = 1;
-foreach my $f qw( universal_total_results RESULT ERROR noslash_q q total_num )
+foreach my $f qw( universal_total_results RESULT ERROR noslash_q q total_num num_elem_start num_elem_end )
 {
     if ( ! exists $answer->raw->{$f} )
     {
@@ -79,6 +83,19 @@ while ( my $r = $answer->next )
 }
 ok( $ok, "query: all results have advertised raw fields" );
 ok( $snippets > 30, "query: almost all results have raw snippets" );
+
+# page_size and p
+
+$answer = $blekko->query( "obama", page_size => 13, p => 6 );
+
+ok( ! $answer->error, "query with page_size and page: no error" );
+ok( $answer->http_code eq '200', "query with page_size and page: status is 200: got ".$answer->http_code );
+ok( $answer->total_num > 11, "query with page_size and p: got at least 12 of 13 results" ); # can be less than 13 for reasons too complicated to explain
+ok( $answer->total_num < 14, "query with page_size and p: got no more than 13 results" );
+ok( $answer->raw->{num_elem_start} == 79, "query with page_size and p: num_elem_start ok: ".$answer->raw->{num_elem_start} );
+ok( $answer->raw->{num_elem_end} < 92, "query with page_size and p: num_elem_end not too big" );
+ok( $answer->raw->{num_elem_end} > 89, "query with page_size and p: num_elem_end not to small: ".$answer->raw->{num_elem_end} );
+
 # XXX test more accessors
 
 # bogus slashtag gives error
@@ -100,5 +117,5 @@ ok( $elapsed >= 0.7, "2 calls in a row obeys qps, ish, elapsed = $elapsed" ); # 
 
 $answer = $blekko->query( "cure for headaches" );
 ok( $answer->auto_slashtag eq "/blekko/health", "cure for headaches: query was rewritten with /health" );
-ok( $answer->auto_slashtag_query eq "/ps=34 /json cure for headaches /health", "cure for headaches: saw the new query" );
+ok( $answer->auto_slashtag_query eq "/json cure for headaches /health", "cure for headaches: saw the new query" );
 
