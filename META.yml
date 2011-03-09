@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               WebService-Blekko
-version:            1.00_06
+version:            1.00_07
 abstract:           access the Blekko JSON APIs
 author:
     - Greg Lindahl <greg@blekko.com>

@@ -57,7 +57,7 @@ ok( $answer->total_num > 32, "query: got at least 32 of 34 results" ); # can be 
 
 ok( defined $answer->raw, "query: raw answer exists" );
 $ok = 1;
-foreach my $f qw( universal_total_results RESULT ERROR noslash_q q total_num num_elem_start num_elem_end )
+foreach my $f ( qw( universal_total_results RESULT ERROR noslash_q q total_num num_elem_start num_elem_end ) )
 {
     if ( ! exists $answer->raw->{$f} )
     {
@@ -72,7 +72,7 @@ my $snippets = 0;
 while ( my $r = $answer->next )
 {
     $snippets++ if defined $r->raw->{snippet};
-    foreach my $f qw( url c n_group url_title short_host )
+    foreach my $f ( qw( url c n_group url_title short_host ) )
     {
         if ( ! exists $r->raw->{$f} )
         {

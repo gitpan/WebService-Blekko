@@ -19,7 +19,7 @@ my $answer;
 eval {
 	WebService::Blekko->new( auth => 'webservice-blekko-testing', scheme => 'not-a-valid-scheme' );
 };
-ok( scalar $@, "invalid scheme throws an exception" );
+ok( $@, "invalid scheme throws an exception: $@" );
 
 my $blekko = WebService::Blekko->new( auth => 'webservice-blekko-testing', );
 my $badserver = WebService::Blekko->new( server => 'doesnotexist.blekko.com', auth => 'webservice-blekko-testing', );

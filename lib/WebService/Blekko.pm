@@ -25,7 +25,7 @@ use WebService::Blekko::QueryResultSet;
 use WebService::Blekko::Pagestats;
 use WebService::Blekko::Result;
 
-our $VERSION = '1.00_06';
+our $VERSION = '1.00_07';
 
 my $useragent = __PACKAGE__ . '_' . $VERSION;
 
@@ -66,7 +66,7 @@ Options include
  auth => api auth key, gotten by contacting apiauth@blekko.com
  source => the name of your program/service
  page_size => number of results to return, default 20, max of 100
- scheme => http, defaults to https
+ scheme => http, defaults to https if available
  qps => API calls per second, defaults to 1. Do not make this greater than 1 without asking.
  agent => the user-agent to be used by LWP::UserAgent. Defaults to the package name_version.
 
@@ -84,13 +84,15 @@ sub new
 
     my %opts = @_;
 
+    my $https_available = LWP::Protocol::implementor( 'https' );
+
     $self->{server} = delete $opts{server} || 'blekko.com';
     $self->{auth} = delete $opts{auth} || die "Must specify auth in opts";
     $self->{auth} = "&auth=" . urlencode( $self->{auth} );
     $self->{source} = delete $opts{source} || $useragent;
     $self->{source} = "&source=" . urlencode( $self->{source} );
     $self->{page_size} = delete $opts{page_size};
-    $self->{scheme} = delete $opts{scheme} || 'https';
+    $self->{scheme} = delete $opts{scheme} || ( $https_available ? 'https' : 'http' );
     $self->{qps} = min( delete $opts{qps} || 1, 1 );
     $self->{last_query} = 0;
 
@@ -130,10 +132,10 @@ sub query
     my $template = "%s://%s/ws/?q=%s%s%s%s%s";
 
     my $ps = '';
-    $ps = "&page_size=$self->{page_size}" if $self->{page_size};
-    $ps = "&page_size=$opts{page_size}" if $opts{page_size};
+    $ps = "&page_size=" . urlencode( $self->{page_size} ) if $self->{page_size};
+    $ps = "&page_size=" . urlencode( $opts{page_size} ) if $opts{page_size};
     my $p = '';
-    $p = "&p=$opts{p}" if $opts{p};
+    $p = "&p=" . urlencode( $opts{p} ) if $opts{p};
 
     my $url = sprintf( $template, $self->{scheme}, $self->{server},
                        urlencode( "/json $q" ), $self->{auth}, $self->{source}, $ps, $p );
@@ -310,8 +312,12 @@ sub createupdate
     }
 
     my $urls_string = '';
-    $urls_string = "&urls=" . join( '%0A', @$urls ) if ( @$urls );
-    $desc = $desc ? "&desc=$desc" : '';
+    if ( @$urls )
+    {
+        @$urls = map { urlencode( $_ ); } @$urls;
+        $urls_string = "&urls=" . join( '%0A', @$urls );
+    }
+    $desc = $desc ? "&desc=" . urlencode( $desc ) : '';
 
     my $template = "%s://%s/tag/add?name=%s&submit=%s%s%s%s%s";
     my $url = sprintf( $template, $self->{scheme}, $self->{server}, $slashtag, $createupdate,
@@ -398,7 +404,11 @@ sub delete_urls
     }
 
     my $urls_string = '';
-    $urls_string = "&urls=" . join( '%0A', @$urls ) if ( @$urls );
+    if ( @$urls )
+    {
+        @$urls = map { urlencode( $_ ); } @$urls;
+        $urls_string = "&urls=" . join( '%0A', @$urls );
+    }
 
     my $template = "%s://%s/tag/edit?submit=1&type=del&name=%s%s%s%s";
     my $url = sprintf( $template, $self->{scheme}, $self->{server}, $slashtag, $urls_string, $self->{auth}, $self->{source} );
